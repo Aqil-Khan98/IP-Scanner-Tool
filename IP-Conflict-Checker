@@ -1,0 +1,26 @@
+# IP Conflict Checker - PowerShell Version by Aqil & ChatGPT
+
+Write-Host "`nScanning local ARP table for possible IP conflicts..." -ForegroundColor Cyan
+
+# Get ARP Table Entries
+$arp = arp -a
+
+# Extract IP addresses
+$ips = $arp | Select-String -Pattern "\d+\.\d+\.\d+\.\d+" | ForEach-Object {
+    ($_ -split "\s+")[1]
+}
+
+# Group and find duplicates
+$duplicates = $ips | Group-Object | Where-Object { $_.Count -gt 1 }
+
+if ($duplicates) {
+    Write-Host "`n??  Possible IP Conflict Detected:" -ForegroundColor Red
+    foreach ($dup in $duplicates) {
+        Write-Host "   IP Address: $($dup.Name) — Count: $($dup.Count)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "`n? No IP conflict found. Everything looks good!" -ForegroundColor Green
+}
+
+Write-Host "`nPress any key to exit..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
